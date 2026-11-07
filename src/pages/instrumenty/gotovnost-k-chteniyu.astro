@@ -1,0 +1,274 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AppCta from '../../components/AppCta.astro';
+import FaqList from '../../components/FaqList.astro';
+import { character } from '../../lib/images';
+import { absolute, breadcrumbSchema, faqSchema } from '../../lib/schema';
+
+const questions = [
+  { group: 'speech', text: 'Ребёнок говорит предложениями из 4-5 слов и рассказывает, что было днём.' },
+  { group: 'speech', text: 'Чётко произносит почти все звуки, его понимают не только родные.' },
+  { group: 'sound', text: 'Слышит первый звук в слове: «С какого звука начинается слово «мама»?» Отвечает «м».' },
+  { group: 'sound', text: 'Подбирает рифму или замечает, что «кот» и «рот» похожи.' },
+  { group: 'sound', text: 'Может хлопками поделить слово на части: «ма-ши-на» - три хлопка.' },
+  { group: 'attention', text: 'Может 10 минут заниматься одним спокойным делом: собирать пазл, рисовать, слушать книгу.' },
+  { group: 'attention', text: 'Понимает и выполняет задание из двух шагов: «Возьми синий карандаш и обведи кружок».' },
+  { group: 'interest', text: 'Сам спрашивает, какая это буква или что здесь написано.' },
+  { group: 'interest', text: 'Любит, когда ему читают, и просит почитать ещё.' },
+  { group: 'letters', text: 'Узнаёт хотя бы 5-6 букв, например в своём имени или на вывесках.' },
+  { group: 'letters', text: 'Пробует сам «прочитать» слово или складывает две буквы вместе.' },
+  { group: 'attention', text: 'Различает «слева» и «справа», может вести пальцем по строке слева направо.' },
+];
+
+const faq = [
+  {
+    q: 'Тест показал, что ребёнок не готов. Это плохо?',
+    a: 'Нет. Готовность к чтению складывается постепенно, и в 4-5 лет многие ответы ещё «иногда». Это значит только, что сейчас полезнее играть со звуками и много читать вслух, а через пару месяцев можно пройти тест снова.',
+  },
+  {
+    q: 'В каком возрасте проходить тест?',
+    a: 'С четырёх лет. Раньше большинство пунктов ещё не про ребёнка, и результат мало что скажет.',
+  },
+];
+
+const site = Astro.site;
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Тесты', path: '/instrumenty/' },
+  { name: 'Готов ли ребёнок учиться читать', path: '/instrumenty/gotovnost-k-chteniyu/' },
+];
+const schema = [
+  {
+    '@type': 'WebApplication',
+    name: 'Тест: готов ли ребёнок учиться читать',
+    url: absolute('/instrumenty/gotovnost-k-chteniyu/', site),
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Любой браузер',
+    offers: { '@type': 'Offer', price: 0, priceCurrency: 'RUB' },
+    inLanguage: 'ru',
+  },
+  breadcrumbSchema(crumbs, site),
+  faqSchema(faq),
+];
+---
+
+<BaseLayout
+  title="Тест: готов ли ребёнок учиться читать"
+  description="Бесплатный тест из 12 вопросов для родителей детей 4-7 лет: речь, слух на звуки, внимание и интерес к буквам. В конце подскажем, с чего начать обучение чтению."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <header class="hero tone-orange">
+      <div>
+        <h1>Готов ли ребёнок учиться читать?</h1>
+        <p>Отметьте, как обычно бывает у вашего ребёнка. Отвечайте по тому, что видите каждый день, а не по лучшему дню. Тест займёт пять минут.</p>
+      </div>
+      <Image src={character('kate')} alt="" widths={[160, 240]} sizes="150px" loading="eager" />
+    </header>
+
+    <form class="quiz" id="quiz">
+      <ol>
+        {questions.map((question, index) => (
+          <li class="question" data-group={question.group}>
+            <p>{question.text}</p>
+            <div class="answers" role="radiogroup" aria-label={`Вопрос ${index + 1}`}>
+              <label><input type="radio" name={`q${index}`} value="2" required /> <span>Да</span></label>
+              <label><input type="radio" name={`q${index}`} value="1" /> <span>Иногда</span></label>
+              <label><input type="radio" name={`q${index}`} value="0" /> <span>Пока нет</span></label>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p class="error" id="quiz-error" hidden>Ответьте, пожалуйста, на все вопросы, чтобы увидеть результат.</p>
+      <button class="button" type="submit">Показать результат</button>
+    </form>
+
+    <section class="result card" id="result" hidden aria-live="polite">
+      <p class="result-label">Результат</p>
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+      <ul id="result-tips"></ul>
+      <p id="result-links"></p>
+      <button class="button secondary" type="button" id="restart">Пройти ещё раз</button>
+    </section>
+
+    <div class="narrow">
+      <AppCta campaign="tool-readiness" text="В приложении есть вопрос «Что ребёнок уже умеет»: выберите, знает ли он буквы или уже читает слоги, и Клара начнёт с нужного урока." />
+      <FaqList items={faq} />
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  type Level = { title: string; text: string; tips: string[]; links: [string, string][] };
+
+  const levels: Record<'early' | 'almost' | 'ready', Level> = {
+    early: {
+      title: 'Пока рано садиться за буквы, и это нормально',
+      text: 'Сейчас ребёнку больше всего помогут игры со звуками и чтение вслух. Это фундамент: без него буквы запоминаются, но в слоги не складываются.',
+      tips: ['Каждый день читайте вслух хотя бы 15 минут', 'Играйте в «Назови слово на звук М»', 'Хлопайте слова по слогам на прогулке', 'Пройдите тест снова через 2-3 месяца'],
+      links: [['/stati/fonematicheskij-sluh/', 'Как развить слух на звуки'], ['/stati/chtenie-vsluh/', 'Как читать вслух']],
+    },
+    almost: {
+      title: 'Почти готов: можно начинать с букв',
+      text: 'Ребёнок уже слышит звуки и может немного посидеть за занятием. Начинайте знакомить с буквами по 2-3 в неделю, а то, что пока не получается, добирайте играми.',
+      tips: ['Начните с гласных А, О, У и буквы М', 'Занимайтесь 10 минут, не больше', 'Называйте буквы как звуки: «м», а не «эм»', 'Параллельно играйте в звуки'],
+      links: [['/stati/poryadok-izucheniya-bukv/', 'В каком порядке учить буквы'], ['/stati/kak-nazyvat-bukvy/', 'Как правильно называть буквы']],
+    },
+    ready: {
+      title: 'Готов! Пора учиться читать',
+      text: 'У ребёнка есть всё, что нужно: речь, слух на звуки, внимание и интерес. Если буквы он уже знает, переходите к слогам, если нет, они пойдут быстро.',
+      tips: ['Повторите буквы и переходите к слогам', 'Тяните первую букву и «съезжайте» на вторую: ммма', 'Читайте первые слова из двух слогов', 'Хвалите за попытку, а не только за результат'],
+      links: [['/stati/kak-nauchit-chitat-po-slogam/', 'Как научить читать по слогам'], ['/stati/znaet-bukvy-ne-chitaet/', 'Знает буквы, но не читает']],
+    },
+  };
+
+  const form = document.getElementById('quiz') as HTMLFormElement;
+  const result = document.getElementById('result') as HTMLElement;
+  const error = document.getElementById('quiz-error') as HTMLElement;
+
+  form.addEventListener('change', () => (error.hidden = true));
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const questions = Array.from(form.querySelectorAll<HTMLLIElement>('.question'));
+    const answers = questions.map((question) => question.querySelector<HTMLInputElement>('input:checked'));
+    if (answers.some((answer) => !answer)) {
+      error.hidden = false;
+      return;
+    }
+    const score = answers.reduce((sum, answer) => sum + Number(answer!.value), 0);
+    const max = questions.length * 2;
+    const ratio = score / max;
+    const level = ratio >= 0.75 ? levels.ready : ratio >= 0.45 ? levels.almost : levels.early;
+
+    document.getElementById('result-title')!.textContent = level.title;
+    document.getElementById('result-text')!.textContent = `${level.text} Баллы: ${score} из ${max}.`;
+    const tips = document.getElementById('result-tips')!;
+    tips.replaceChildren(...level.tips.map((tip) => Object.assign(document.createElement('li'), { textContent: tip })));
+    const links = document.getElementById('result-links')!;
+    links.replaceChildren(
+      document.createTextNode('Почитайте: '),
+      ...level.links.flatMap(([href, text], index) => {
+        const link = Object.assign(document.createElement('a'), { href, textContent: text });
+        return index === 0 ? [link] : [document.createTextNode(', '), link];
+      }),
+    );
+    result.hidden = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('restart')!.addEventListener('click', () => {
+    form.reset();
+    result.hidden = true;
+    form.scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+
+<style>
+  .page {
+    padding: 28px 0 40px;
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 150px;
+    gap: 24px;
+    align-items: end;
+    background: var(--tone-soft);
+    border-radius: var(--radius);
+    padding: 32px 32px 0;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .hero > div {
+    padding-bottom: 28px;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    max-width: 60ch;
+  }
+  .hero :global(img) {
+    width: 140px;
+    margin-bottom: -8px;
+  }
+  .quiz ol {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+    counter-reset: q;
+    display: grid;
+    gap: 14px;
+    max-width: 820px;
+  }
+  .question {
+    counter-increment: q;
+    background: var(--paper);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow);
+    padding: 18px 22px;
+  }
+  .question p {
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .question p::before {
+    content: counter(q) '. ';
+    color: var(--orange);
+    font-weight: 900;
+  }
+  .answers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .answers label {
+    cursor: pointer;
+  }
+  .answers input {
+    position: absolute;
+    opacity: 0;
+  }
+  .answers span {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 2px solid var(--line);
+    font-weight: 800;
+    background: #fff;
+  }
+  .answers input:checked + span {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  .answers input:focus-visible + span {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+  }
+  .error {
+    color: #c62828;
+    font-weight: 800;
+  }
+  .result {
+    max-width: 820px;
+    margin-top: 32px;
+    border: 3px solid var(--orange);
+    scroll-margin-top: 90px;
+  }
+  .result-label {
+    font-weight: 900;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+  .narrow {
+    max-width: 820px;
+  }
+  @media (max-width: 640px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

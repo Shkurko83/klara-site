@@ -1,0 +1,107 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles } from '../../lib/articles';
+import { character } from '../../lib/images';
+import { absolute, breadcrumbSchema } from '../../lib/schema';
+import { CATEGORIES, type CategoryId } from '../../site.config';
+
+const articles = await getArticles();
+const site = Astro.site;
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Статьи', path: '/stati/' },
+];
+const groups = (Object.keys(CATEGORIES) as CategoryId[])
+  .map((id) => ({ id, ...CATEGORIES[id], items: articles.filter((article) => article.data.category === id) }))
+  .filter((group) => group.items.length > 0);
+
+const schema = [
+  {
+    '@type': 'CollectionPage',
+    name: 'Статьи для родителей',
+    url: absolute('/stati/', site),
+    hasPart: articles.map((article) => ({ '@type': 'Article', headline: article.data.title, url: absolute(`/stati/${article.id}/`, site) })),
+  },
+  breadcrumbSchema(crumbs, site),
+];
+---
+
+<BaseLayout
+  title="Статьи для родителей: чтение, речь, письмо, счёт и подготовка к школе"
+  description="Понятные статьи о том, как научить ребёнка 3-7 лет читать по слогам, развить речь и руку для письма, научить считать и спокойно подготовить к школе."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <header class="intro">
+      <h1>Статьи для родителей</h1>
+      <p class="muted">Пишем так, как объяснили бы подруге за чаем: без терминов, с примерами и с тем, что можно сделать уже сегодня вечером.</p>
+      <nav class="topics" aria-label="Темы">
+        {groups.map((group) => <a class={`pill tone-${group.color}`} href={`#${group.id}`}>{group.title}</a>)}
+      </nav>
+    </header>
+
+    {groups.map((group) => (
+      <section class={`group tone-${group.color}`} id={group.id} aria-labelledby={`${group.id}-title`}>
+        <div class="group-head">
+          <Image src={character(group.character)} alt="" width={60} height={103} />
+          <div>
+            <h2 id={`${group.id}-title`}><a href={`/razdel/${group.id}/`}>{group.title}</a></h2>
+            <p class="muted">{group.description}</p>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          {group.items.map((article) => <ArticleCard article={article} />)}
+        </div>
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 28px 0 40px;
+  }
+  .intro {
+    max-width: 760px;
+    margin-bottom: 40px;
+  }
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .topics a {
+    text-decoration: none;
+  }
+  .group {
+    margin-bottom: 56px;
+    scroll-margin-top: 90px;
+  }
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .group-head :global(img) {
+    width: 52px;
+    background: var(--tone-soft);
+    border-radius: 16px;
+    padding: 6px 4px 0;
+  }
+  .group-head h2 {
+    margin: 0;
+  }
+  .group-head h2 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .group-head p {
+    margin: 0;
+  }
+</style>

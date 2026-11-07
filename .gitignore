@@ -1,0 +1,20 @@
+# Сборка
+dist/
+.astro/
+
+# Зависимости
+node_modules/
+
+# Логи
+npm-debug.log*
+
+# Окружение
+.env
+.env.*
+!.env.example
+
+# Системные файлы
+.DS_Store
+
+# WebStorm
+.idea/

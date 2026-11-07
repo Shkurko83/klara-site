@@ -1,0 +1,79 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles } from '../../lib/articles';
+import { character } from '../../lib/images';
+import { absolute, breadcrumbSchema, personSchema } from '../../lib/schema';
+import { AUTHOR, APP, appStoreUrl } from '../../site.config';
+
+const articles = (await getArticles()).slice(0, 6);
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: AUTHOR.name, path: `/avtor/${AUTHOR.id}/` },
+];
+const schema = [personSchema(Astro.site), breadcrumbSchema(crumbs, Astro.site)];
+---
+
+<BaseLayout
+  title="Константин Шкурко (Konstantin Shkurko): автор «Учимся читать с Кларой»"
+  description="Константин Шкурко, Konstantin Shkurko: разработчик детских приложений и автор «Учимся читать с Кларой». Пишет для родителей о том, как научить ребёнка читать."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <header class="hero">
+      <div>
+        <p class="latin">{AUTHOR.nameLatin}</p>
+        <h1>{AUTHOR.name}</h1>
+        <p class="lead">{AUTHOR.bio}</p>
+        <div class="links">
+          <a class="button dark" href={appStoreUrl('author')} rel="noopener">Приложение в App Store</a>
+          <a class="button secondary" href={AUTHOR.github} rel="me noopener">GitHub</a>
+        </div>
+      </div>
+      <Image src={character('klara')} alt="Клара, персонаж приложений Константина Шкурко" widths={[220, 320]} sizes="200px" loading="eager" />
+    </header>
+
+    <div class="prose">
+      <h2>Коротко и честно</h2>
+      <p>Меня ищут как Константина Шкурко и как Konstantin Shkurko. Я сделал приложение «{APP.name}» (в магазине оно также называется «{APP.alternateName}»). Порядок букв в уроках, голос Клары, кабинет для родителя - это всё собиралось руками, на реальных занятиях детей, а не по учебнику дефектологии.</p>
+      <p>Я не логопед. Если ребёнок в пять лет почти не говорит фразами, путает слоги после года спокойных занятий или чтение даётся через слёзы каждый день, идите к специалисту. Статьи и приложение здесь для обычной домашней работы: буквы, слоги, привычка 10 минут в день.</p>
+      <p>На этом сайте те же мысли, которые обычно не влезают в описание App Store. Если текст полезен без приложения, так и должно быть.</p>
+    </div>
+
+    {articles.length > 0 && (
+      <section>
+        <h2>Статьи автора</h2>
+        <div class="grid grid-2">
+          {articles.map((article) => <ArticleCard article={article} />)}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 48px; }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    align-items: end;
+    gap: 24px;
+    background: var(--blue-soft);
+    border-radius: var(--radius);
+    padding: 36px 36px 0;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .hero > div { padding-bottom: 32px; }
+  .latin { font-weight: 800; color: var(--blue); margin-bottom: 4px; }
+  .lead { font-size: 1.12rem; color: var(--ink-soft); }
+  .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+  .hero :global(img) { width: 180px; justify-self: center; }
+  section { margin-top: 48px; }
+  @media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; padding: 24px 22px 0; }
+  }
+</style>

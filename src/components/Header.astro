@@ -1,0 +1,165 @@
+---
+import { Image } from 'astro:assets';
+import { character } from '../lib/images';
+import { SITE } from '../site.config';
+
+const links = [
+  { href: '/stati/', label: 'Статьи' },
+  { href: '/instrumenty/', label: 'Тесты' },
+  { href: '/materialy/', label: 'Для печати' },
+  { href: '/druzya-klary/', label: 'Клара и друзья' },
+  { href: '/prilozhenie/', label: 'Приложение' },
+];
+const path = Astro.url.pathname;
+---
+
+<header class="header no-print">
+  <div class="container bar">
+    <a class="logo" href="/" aria-label={`${SITE.name}, на главную`}>
+      <span class="logo-avatar">
+        <Image src={character('klara')} alt="" width={64} height={110} loading="eager" />
+      </span>
+      <span class="logo-text">{SITE.name}</span>
+    </a>
+
+    <nav class="nav" aria-label="Основное меню">
+      {links.map((link) => (
+        <a href={link.href} aria-current={path.startsWith(link.href) ? 'page' : undefined}>{link.label}</a>
+      ))}
+      <a class="search" href="/poisk/" aria-label="Поиск по сайту">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l4.9 4.89-1.42 1.42-4.89-4.9A8 8 0 1 1 10 2Zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z" /></svg>
+      </a>
+    </nav>
+
+    <details class="mobile">
+      <summary aria-label="Открыть меню">
+        <span></span><span></span><span></span>
+      </summary>
+      <div class="mobile-menu">
+        {links.map((link) => <a href={link.href}>{link.label}</a>)}
+        <a href="/poisk/">Поиск</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 248, 238, 0.88);
+    backdrop-filter: saturate(1.4) blur(12px);
+    -webkit-backdrop-filter: saturate(1.4) blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 72px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 900;
+    font-size: 1.25rem;
+  }
+  .logo-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--orange-soft);
+    overflow: hidden;
+    display: grid;
+    place-items: start center;
+    border: 3px solid #fff;
+    box-shadow: var(--shadow);
+  }
+  .logo-avatar :global(img) {
+    width: 44px;
+    height: auto;
+    margin-top: 2px;
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav a {
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 800;
+    padding: 8px 14px;
+    border-radius: 999px;
+  }
+  .nav a:hover,
+  .nav a[aria-current='page'] {
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+  .nav .search {
+    display: grid;
+    place-items: center;
+    padding: 8px;
+  }
+  .mobile {
+    display: none;
+    position: relative;
+  }
+  .mobile summary {
+    list-style: none;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+    display: grid;
+    place-content: center;
+    gap: 5px;
+  }
+  .mobile summary::-webkit-details-marker {
+    display: none;
+  }
+  .mobile summary span {
+    display: block;
+    width: 20px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .mobile-menu {
+    position: absolute;
+    right: 0;
+    top: 54px;
+    background: var(--paper);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-strong);
+    padding: 10px;
+    display: grid;
+    min-width: 220px;
+  }
+  .mobile-menu a {
+    padding: 12px 14px;
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 800;
+    border-radius: 10px;
+  }
+  .mobile-menu a:hover {
+    background: var(--orange-soft);
+  }
+  @media (max-width: 960px) {
+    .nav {
+      display: none;
+    }
+    .mobile {
+      display: block;
+    }
+  }
+</style>

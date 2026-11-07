@@ -1,0 +1,509 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import PhoneShot from '../components/PhoneShot.astro';
+import FaqList from '../components/FaqList.astro';
+import { getArticles } from '../lib/articles';
+import { character } from '../lib/images';
+import { appSchema, faqSchema, personSchema } from '../lib/schema';
+import { APP, FRIENDS, SITE, appStoreUrl } from '../site.config';
+
+const articles = await getArticles();
+const featured = articles.filter((article) => article.data.featured).slice(0, 6);
+const popular = featured.length >= 4 ? featured : articles.slice(0, 6);
+
+const ages = [
+  {
+    age: '3-4 года',
+    title: 'Слушаем и играем со звуками',
+    text: 'Читайте вслух каждый день, играйте в рифмы и «Кто как говорит». Буквы специально не учим, но если спрашивает, отвечаем.',
+    link: '/stati/chtenie-vsluh/',
+    linkText: 'Как читать вслух, чтобы ребёнок полюбил книги',
+    tone: 'blue',
+  },
+  {
+    age: '4-5 лет',
+    title: 'Знакомимся с буквами',
+    text: 'Две-три буквы в неделю. Начинаем с тех, что легко тянуть голосом: А, О, У, М. Называем звуки коротко: «м», а не «эм».',
+    link: '/stati/poryadok-izucheniya-bukv/',
+    linkText: 'В каком порядке учить буквы',
+    tone: 'green',
+  },
+  {
+    age: '5-6 лет',
+    title: 'Складываем слоги',
+    text: 'МА, МО, МУ: тянем первую букву и «съезжаем» на вторую. Потом первые слова из двух слогов: ма-ма, ру-ка.',
+    link: '/stati/kak-nauchit-chitat-po-slogam/',
+    linkText: 'Как научить читать по слогам',
+    tone: 'orange',
+  },
+  {
+    age: '6-7 лет',
+    title: 'Читаем и понимаем',
+    text: 'Короткие предложения, вопросы по прочитанному, своя первая книжка. Скорость придёт сама, главное понимание.',
+    link: '/stati/ne-ponimaet-prochitannoe/',
+    linkText: 'Читает, но не понимает: что делать',
+    tone: 'purple',
+  },
+];
+
+const homeFaq = [
+  {
+    q: 'Во сколько лет учить ребёнка читать?',
+    a: 'Чаще всего дети готовы к чтению в 5-6 лет, но смотреть стоит не на возраст, а на признаки: ребёнок хорошо говорит, слышит первый звук в слове, может 10 минут заниматься одним делом и сам интересуется буквами. У кого-то это бывает в четыре года, у кого-то ближе к семи, и это нормально.',
+  },
+  {
+    q: 'Сколько минут в день заниматься с дошкольником?',
+    a: 'Для 4-6 лет хватает 10-15 минут в день. Короткое занятие каждый день работает лучше, чем час по выходным: ребёнок не устаёт, а то, что он узнал вчера, сегодня закрепляется.',
+  },
+  {
+    q: 'Нужно ли уметь читать до первого класса?',
+    a: 'Нет, школа обязана научить ребёнка читать сама. Но если к школе ребёнок уже читает по слогам, первый класс даётся ему спокойнее: он не тратит силы на буквы и успевает за темпом урока.',
+  },
+  {
+    q: 'Что такое «Учимся читать с Кларой»?',
+    a: `Это приложение для ${APP.platforms}, в котором Клара ведёт ребёнка от первых букв к чтению предложений. В нём короткие уроки с голосом, наклейки и кубки за успехи, а для родителей кабинет с отчётами по каждому ребёнку. Первые уроки бесплатные, полный доступ по подписке.`,
+  },
+];
+
+const schema = [personSchema(Astro.site), appSchema(Astro.site), faqSchema(homeFaq)];
+---
+
+<BaseLayout title={`${SITE.name}: ${SITE.tagline.toLowerCase()}`} description={SITE.description} schema={schema} bareTitle>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <span class="eyebrow">Для родителей детей 3-7 лет</span>
+        <h1>Научим ребёнка читать без слёз и зубрёжки</h1>
+        <p class="lead">Объясняем по шагам, что делать в каждом возрасте, даём игры, тесты и материалы для печати. А когда захочется занятий с голосом и наградами, с ребёнком позанимается Клара.</p>
+        <div class="hero-actions">
+          <a class="button" href="#start">С чего начать</a>
+          <a class="button secondary" href="/prilozhenie/">Приложение «{APP.name}»</a>
+        </div>
+        <ul class="facts">
+          <li><strong>10-15 минут</strong> в день достаточно</li>
+          <li><strong>33 буквы</strong> в 11 коротких уроках</li>
+          <li><strong>Бесплатные</strong> тесты и материалы</li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg class="sun" viewBox="0 0 200 200"><g fill="#ffc23d"><circle cx="100" cy="100" r="46" />{Array.from({ length: 12 }, (_, i) => <rect x="96" y="12" width="8" height="30" rx="4" transform={`rotate(${i * 30} 100 100)`} />)}</g></svg>
+        <div class="blob"></div>
+        <Image class="hero-klara" src={character('klara')} alt="" widths={[300, 460]} sizes="(max-width: 860px) 50vw, 340px" loading="eager" fetchpriority="high" />
+        <Image class="hero-friend friend-zoya" src={character('zoya')} alt="" widths={[160, 220]} sizes="140px" loading="eager" />
+        <Image class="hero-friend friend-oscar" src={character('oscar')} alt="" widths={[160, 220]} sizes="130px" loading="eager" />
+      </div>
+    </div>
+    <svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path fill="#fff8ee" d="M0 40c240 40 480 40 720 0s480-40 720 0v40H0z" /></svg>
+  </section>
+
+  <section class="section" id="start">
+    <div class="container">
+      <div class="section-title">
+        <span class="eyebrow">Путь к чтению</span>
+        <h2>Что делать в каждом возрасте</h2>
+        <p>Четыре ступеньки, по которым идут почти все дети. Не спешите перепрыгивать: каждая следующая держится на предыдущей.</p>
+      </div>
+      <ol class="ages">
+        {ages.map((item, index) => (
+          <li class={`age-card tone-${item.tone}`}>
+            <span class="step">{index + 1}</span>
+            <span class="pill">{item.age}</span>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+            <a href={item.link}>{item.linkText}</a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section tools-section">
+    <div class="container">
+      <div class="section-title">
+        <span class="eyebrow">Бесплатно</span>
+        <h2>Проверьте за пять минут</h2>
+      </div>
+      <div class="grid grid-2">
+        <a class="tool tone-orange" href="/instrumenty/gotovnost-k-chteniyu/">
+          <Image src={character('kate')} alt="" width={110} height={189} />
+          <div>
+            <h3>Готов ли ребёнок учиться читать?</h3>
+            <p>12 простых вопросов о речи, внимании и интересе к буквам. В конце подскажем, с какой ступеньки начать.</p>
+            <span class="tool-link">Пройти тест</span>
+          </div>
+        </a>
+        <a class="tool tone-blue" href="/instrumenty/tehnika-chteniya/">
+          <Image src={character('oscar')} alt="" width={110} height={189} />
+          <div>
+            <h3>Проверка техники чтения</h3>
+            <p>Ребёнок читает текст, вы нажимаете на слово, где он остановился. Покажем слова в минуту и сравним с ориентирами по классам.</p>
+            <span class="tool-link">Проверить</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-title">
+        <span class="eyebrow">Статьи</span>
+        <h2>Что чаще всего спрашивают родители</h2>
+      </div>
+      <div class="grid grid-2">
+        {popular.map((article) => <ArticleCard article={article} />)}
+      </div>
+      <p class="center"><a class="button secondary" href="/stati/">Все статьи</a></p>
+    </div>
+  </section>
+
+  <section class="section printables">
+    <div class="container">
+      <div class="section-title">
+        <span class="eyebrow">Распечатайте</span>
+        <h2>Материалы для занятий дома</h2>
+        <p>Откройте, нажмите «Распечатать» и занимайтесь. Регистрация не нужна.</p>
+      </div>
+      <div class="grid grid-3">
+        <a class="print-card tone-orange" href="/materialy/kartochki-slogov/"><h3>Карточки слогов</h3><p>Слоги с М, Н, Л, Р, С, П, Т и К. Режьте, раскладывайте, играйте в «лото».</p></a>
+        <a class="print-card tone-green" href="/materialy/bukvy-raskraska/"><h3>Буквы-раскраски</h3><p>Все 33 буквы крупным контуром: раскрасить, обвести пальцем, повесить на холодильник.</p></a>
+        <a class="print-card tone-yellow" href="/materialy/kalendar-solnyshek/"><h3>Календарь солнышек</h3><p>Неделя занятий на одном листе: позанимались, раскрасили солнышко. Как в приложении.</p></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section app">
+    <div class="container app-grid">
+      <div>
+        <span class="eyebrow">Приложение</span>
+        <h2>«{APP.name}»</h2>
+        <p>Всё, о чём мы пишем, собрано в одно приложение для {APP.platforms}. Ребёнок занимается сам, а вы видите, как у него получается.</p>
+        <ul class="checks">
+          <li>Клара голосом объясняет каждое задание: ребёнку не нужно уметь читать инструкции</li>
+          <li>Буквы, слоги, слова и предложения в том порядке, в каком их легче всего освоить</li>
+          <li>Гномы, жители космической станции и кубки за каждый пройденный урок</li>
+          <li>«Занятие дня»: одна кнопка, и Клара сама выбирает следующий урок</li>
+          <li>Кабинет родителя с пин-кодом: несколько детей, отчёт по неделе, буквы, которые даются трудно</li>
+        </ul>
+        <div class="hero-actions">
+          <a class="button dark" href={appStoreUrl('home')} rel="noopener">Скачать в App Store</a>
+          <a class="button secondary" href="/prilozhenie/">Подробнее</a>
+        </div>
+      </div>
+      <div class="shots">
+        <PhoneShot name="main" alt="Главный экран приложения с карточкой «Занятие дня»" />
+        <PhoneShot name="letters" alt="Список уроков букв: пройденные уроки со звёздами, текущий урок с Кларой" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-title">
+        <span class="eyebrow">Знакомьтесь</span>
+        <h2>Клара и её друзья</h2>
+        <p>У каждого свой предмет и свой характер. Дети быстро находят любимчика и идут заниматься «к нему».</p>
+      </div>
+      <ul class="friends">
+        {FRIENDS.map((friend) => (
+          <li>
+            <a href="/druzya-klary/">
+              <Image src={character(friend.id)} alt={friend.name} widths={[140, 200]} sizes="120px" />
+              <strong>{friend.name}</strong>
+              <span>{friend.subject}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container narrow">
+      <FaqList items={homeFaq} title="Коротко о главном" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    background: linear-gradient(180deg, #dff1ff 0%, #fff3df 100%);
+    padding: 48px 0 96px;
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .lead {
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    max-width: 36em;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 26px 0;
+  }
+  .facts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .facts li {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.95rem;
+  }
+  .hero-art {
+    position: relative;
+    height: 460px;
+  }
+  .sun {
+    position: absolute;
+    width: 160px;
+    right: 6%;
+    top: 0;
+    animation: spin 40s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .blob {
+    position: absolute;
+    inset: 70px 10% 30px 8%;
+    background: radial-gradient(circle at 50% 45%, #ffffff 0%, #ffe7c2 60%, transparent 72%);
+    border-radius: 50%;
+  }
+  .hero-klara {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 14px 18px rgba(80, 40, 0, 0.25));
+  }
+  .hero-friend {
+    position: absolute;
+    bottom: 0;
+    filter: drop-shadow(0 10px 14px rgba(80, 40, 0, 0.2));
+  }
+  .friend-zoya {
+    left: 0;
+    width: 140px;
+  }
+  .friend-oscar {
+    right: 0;
+    width: 130px;
+  }
+  .wave {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 80px;
+  }
+  .ages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 20px;
+  }
+  .age-card {
+    position: relative;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 24px 24px;
+    border-top: 0;
+  }
+  .age-card .step {
+    position: absolute;
+    top: -16px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--tone);
+    color: #fff;
+    font-weight: 900;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  .age-card h3 {
+    margin: 12px 0 8px;
+  }
+  .age-card p {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+  .age-card a {
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .tools-section {
+    background: var(--paper);
+  }
+  .tool {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 20px;
+    align-items: end;
+    background: var(--tone-soft);
+    border-radius: var(--radius);
+    padding: 28px 28px 0;
+    text-decoration: none;
+    color: var(--ink);
+    overflow: hidden;
+    transition: transform 0.15s ease;
+  }
+  .tool:hover {
+    transform: translateY(-3px);
+    color: var(--ink);
+  }
+  .tool :global(img) {
+    width: 100px;
+    margin-bottom: -8px;
+  }
+  .tool div {
+    padding-bottom: 28px;
+  }
+  .tool p {
+    color: var(--ink-soft);
+  }
+  .tool-link {
+    font-weight: 900;
+    color: var(--tone);
+  }
+  .center {
+    text-align: center;
+    margin-top: 32px;
+  }
+  .print-card {
+    display: block;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px;
+    text-decoration: none;
+    color: var(--ink);
+    border-bottom: 6px solid var(--tone);
+  }
+  .print-card:hover {
+    color: var(--ink);
+    transform: translateY(-3px);
+  }
+  .print-card p {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .app {
+    background: linear-gradient(135deg, #fff1d6, #ffe0b3);
+  }
+  .app-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .checks {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    display: grid;
+    gap: 10px;
+  }
+  .checks li {
+    position: relative;
+    padding-left: 34px;
+  }
+  .checks li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z'/%3E%3C/svg%3E") center / 16px no-repeat;
+  }
+  .shots {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  .shots :global(.phone-shot:nth-child(2)) {
+    margin-top: 48px;
+  }
+  .friends {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 18px;
+  }
+  .friends a {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 12px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .friends :global(img) {
+    width: 90px;
+    height: auto;
+    margin-bottom: 8px;
+  }
+  .friends strong {
+    font-size: 1.2rem;
+  }
+  .friends span {
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+  .narrow {
+    max-width: 820px;
+  }
+  @media (max-width: 860px) {
+    .hero-grid,
+    .app-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero-art {
+      height: 340px;
+    }
+    .hero-klara {
+      width: 190px;
+    }
+    .friend-zoya {
+      width: 105px;
+    }
+    .friend-oscar {
+      width: 100px;
+    }
+    .sun {
+      width: 110px;
+    }
+  }
+</style>

@@ -1,0 +1,128 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PhoneShot from '../components/PhoneShot.astro';
+import FaqList from '../components/FaqList.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { character } from '../lib/images';
+import { appSchema, breadcrumbSchema, faqSchema, personSchema } from '../lib/schema';
+import { APP, AUTHOR, appStoreUrl } from '../site.config';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Приложение', path: '/prilozhenie/' },
+];
+
+const faq = [
+  {
+    q: 'Приложение платное?',
+    a: 'Скачать можно бесплатно. Открыты первые уроки букв, слогов и слов: этого хватает, чтобы понять, подходит ли ребёнку. Остальные уроки, игры и кабинет родителя открываются по подписке. Есть месяц и год, год выгоднее, если занимаетесь регулярно.',
+  },
+  {
+    q: 'Есть ли версия для Android?',
+    a: 'Пока нет. «Учимся читать с Кларой» работает на iPhone и iPad. Если появится Android, напишем об этом здесь.',
+  },
+  {
+    q: 'Сколько детей можно добавить?',
+    a: 'Несколько. У каждого свой прогресс, свой уровень старта и свои солнышки за неделю. Кабинет закрыт пин-кодом, чтобы ребёнок сам не переключал профили и не открывал покупки.',
+  },
+  {
+    q: 'Кто такой Konstantin Shkurko?',
+    a: `${AUTHOR.name} (${AUTHOR.nameLatin}) придумал и сделал приложение «${APP.name}». Он не логопед и не учитель: он разработчик, который несколько лет собирал уроки и смотрел, как дети ими пользуются. На этом сайте он же пишет статьи для родителей.`,
+  },
+];
+
+const schema = [personSchema(Astro.site), appSchema(Astro.site), breadcrumbSchema(crumbs, Astro.site), faqSchema(faq)];
+---
+
+<BaseLayout
+  title="Учимся читать с Кларой: приложение для iPhone и iPad"
+  description="Приложение «Учимся читать с Кларой» для детей 3-7 лет: буквы, слоги, слова и предложения, голос Клары, награды и кабинет для родителей. Автор: Константин Шкурко (Konstantin Shkurko)."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <header class="hero">
+      <div>
+        <span class="eyebrow">Для {APP.platforms}</span>
+        <h1>Учимся читать с Кларой</h1>
+        <p class="lead">Так родители чаще всего ищут наше приложение. В App Store оно называется «{APP.alternateName}». Это одно и то же: короткие уроки чтения с голосом, наградами и кабинетом для взрослого.</p>
+        <div class="hero-actions">
+          <a class="button dark" href={appStoreUrl('app-page')} rel="noopener">Скачать в App Store</a>
+          <a class="button secondary" href={`/avtor/${AUTHOR.id}/`}>Об авторе, {AUTHOR.name}</a>
+        </div>
+      </div>
+      <Image src={character('klara')} alt="Клара, ведущая приложения «Учимся читать с Кларой»" widths={[220, 360]} sizes="220px" loading="eager" />
+    </header>
+
+    <section class="grid grid-2 shots-row">
+      <PhoneShot name="main" alt="Главный экран: занятие дня и Клара" caption="Занятие дня: одна кнопка" />
+      <PhoneShot name="letters" alt="Список уроков букв" caption="Уроки букв с прогрессом" />
+      <PhoneShot name="syllables" alt="Уроки слогов" caption="Слоги после букв" />
+      <PhoneShot name="cabinet" alt="Кабинет родителя" caption="Кабинет под пин-кодом" />
+    </section>
+
+    <section class="prose wide">
+      <h2>Для кого это приложение</h2>
+      <p>Для детей {APP.ages}, которые ещё не читают или уже знают буквы и буксуют на слогах. Ребёнок не обязан уметь читать инструкции: Клара говорит вслух, что делать.</p>
+      <p>Для родителя, у которого нет сил каждый вечер устраивать «урок». Десять-пятнадцать минут, ребёнок занимается сам, вы потом открываете кабинет и видите, что получилось.</p>
+
+      <h2>Как устроены занятия</h2>
+      <p>Сначала буквы. Не по алфавиту, а в том порядке, в каком из них раньше получаются слоги: А, О, У, потом Е, М, И. Всего 11 коротких уроков на 33 буквы.</p>
+      <p>Когда гласные и несколько согласных уже знакомы, появляются слоги: МА, МО, МУ. Потом слова из двух слогов и короткие предложения. Если в слоге встречается ещё незнакомая буква, лучше вернуться к ней. В приложении уроки уже выстроены так, чтобы это случалось реже.</p>
+      <p>На старте можно сказать, что ребёнок уже умеет: ещё не знает букв, знает буквы или уже читает слоги. Клара начнёт не с нуля, а с нужного места. Прогресс каждого ребёнка хранится отдельно.</p>
+
+      <h2>Что видит ребёнок</h2>
+      <ul>
+        <li>Голос Клары: объясняет задание, хвалит, зовёт, если урок закрыт.</li>
+        <li>Занятие дня: Клара сама выбирает следующий урок.</li>
+        <li>Гномы за буквы, жители космической станции за слоги, кубки за проверки.</li>
+        <li>Солнышки за дни, когда получилось позаниматься.</li>
+      </ul>
+
+      <h2>Что видит родитель</h2>
+      <p>Кабинет закрыт пин-кодом. Там отчёт за неделю, буквы, которые даются труднее других, и список детей. Покупки тоже только отсюда: ребёнок не увидит окно «оформите подписку» посреди игры.</p>
+      <p>Самый честный совет, который мы пишем и в самом приложении: если есть возможность заниматься по бумажной азбуке, занимайтесь по бумаге. Палец по строке и собственные страницы ничем не заменить. Приложение выручает в дороге, в очереди и в те вечера, когда у взрослого нет ресурса на полный урок.</p>
+    </section>
+
+    <section class="card prices">
+      <h2>Что бесплатно, а что по подписке</h2>
+      <ul>
+        <li>Скачивание бесплатное.</li>
+        <li>Бесплатно открыты первые 5 уроков букв, 3 урока слогов и 2 урока слов.</li>
+        <li>Подписка открывает остальные уроки, игры, награды и кабинет.</li>
+        <li>Месяц стоит около 2,99 доллара в пересчёте App Store. Есть годовой план, он выгоднее, если занимаетесь несколько месяцев.</li>
+      </ul>
+      <p class="muted">Цена в рублях зависит от региона App Store и курса. Точную сумму показывает магазин перед оплатой.</p>
+      <a class="button dark" href={appStoreUrl('app-prices')} rel="noopener">Открыть в App Store</a>
+    </section>
+
+    <FaqList items={faq} />
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 48px; }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    align-items: end;
+    gap: 24px;
+    background: linear-gradient(135deg, #fff1d6, #ffe8c2);
+    border-radius: var(--radius);
+    padding: 36px 36px 0;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .hero > div { padding-bottom: 32px; }
+  .lead { font-size: 1.15rem; color: var(--ink-soft); max-width: 42em; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+  .hero :global(img) { width: 200px; justify-self: center; }
+  .shots-row { margin-bottom: 48px; justify-items: center; }
+  .wide { max-width: 760px; }
+  .prices { max-width: 760px; }
+  @media (max-width: 720px) {
+    .hero { grid-template-columns: 1fr; padding: 24px 22px 0; }
+    .hero :global(img) { width: 140px; }
+  }
+</style>

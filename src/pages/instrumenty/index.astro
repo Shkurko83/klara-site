@@ -1,0 +1,80 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { character } from '../../lib/images';
+import { absolute, breadcrumbSchema } from '../../lib/schema';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Тесты', path: '/instrumenty/' },
+];
+
+const tools = [
+  {
+    href: '/instrumenty/gotovnost-k-chteniyu/',
+    title: 'Готов ли ребёнок учиться читать',
+    text: '12 вопросов о речи, слухе на звуки, внимании и интересе к буквам. В конце подскажем, с какой ступеньки начать.',
+    character: 'kate',
+    tone: 'orange',
+  },
+  {
+    href: '/instrumenty/tehnika-chteniya/',
+    title: 'Проверка техники чтения',
+    text: 'Ребёнок читает текст вслух, вы отмечаете слово, на котором остановились. Покажем слова в минуту и сравним с ориентирами по классам.',
+    character: 'oscar',
+    tone: 'blue',
+  },
+];
+
+const schema = [
+  { '@type': 'CollectionPage', name: 'Тесты для родителей', url: absolute('/instrumenty/', Astro.site) },
+  breadcrumbSchema(crumbs, Astro.site),
+];
+---
+
+<BaseLayout
+  title="Тесты: готовность к чтению и техника чтения"
+  description="Бесплатные тесты для родителей: готов ли дошкольник учиться читать и сколько слов в минуту читает ученик. Без регистрации."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <h1>Тесты и проверки</h1>
+    <p class="muted">Ничего не сохраняем на сервере: результат видите только вы, в этом браузере. Это не диагностика и не замена логопеда, а ориентир «с чего начать сегодня».</p>
+    <div class="grid grid-2">
+      {tools.map((tool) => (
+        <a class={`tool tone-${tool.tone}`} href={tool.href}>
+          <Image src={character(tool.character)} alt="" width={100} height={172} />
+          <div>
+            <h2>{tool.title}</h2>
+            <p>{tool.text}</p>
+            <span>Открыть</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 48px; }
+  .page > .muted { max-width: 46em; margin-bottom: 32px; }
+  .tool {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 18px;
+    align-items: end;
+    background: var(--tone-soft);
+    border-radius: var(--radius);
+    padding: 28px 24px 0;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .tool:hover { color: var(--ink); transform: translateY(-2px); }
+  .tool :global(img) { width: 90px; margin-bottom: -6px; }
+  .tool div { padding-bottom: 24px; }
+  .tool p { color: var(--ink-soft); }
+  .tool span { font-weight: 900; color: var(--tone); }
+  h2 { font-size: 1.35rem; }
+</style>

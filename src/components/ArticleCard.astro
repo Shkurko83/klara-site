@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { character } from '../lib/images';
+import { CATEGORIES } from '../site.config';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+}
+
+const { article } = Astro.props;
+const category = CATEGORIES[article.data.category];
+---
+
+<a class={`article-card tone-${category.color}`} href={`/stati/${article.id}/`}>
+  <div class="cover">
+    <Image src={character(article.data.character)} alt="" widths={[160, 240]} sizes="120px" />
+  </div>
+  <div class="body">
+    <span class="pill">{category.title}</span>
+    <h3>{article.data.title}</h3>
+    <p>{article.data.description}</p>
+    <span class="age">{article.data.age}</span>
+  </div>
+</a>
+
+<style>
+  .article-card {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 18px;
+    align-items: start;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .article-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-strong);
+    color: var(--ink);
+  }
+  .cover {
+    background: var(--tone-soft);
+    border-radius: 18px;
+    height: 130px;
+    display: grid;
+    place-items: end center;
+    overflow: hidden;
+  }
+  .cover :global(img) {
+    width: 82px;
+    height: auto;
+    transform: translateY(8px);
+  }
+  h3 {
+    margin: 10px 0 6px;
+    font-size: 1.15rem;
+  }
+  p {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .age {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+</style>

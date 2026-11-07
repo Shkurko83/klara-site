@@ -1,0 +1,111 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import AppCta from '../components/AppCta.astro';
+import { character } from '../lib/images';
+import { absolute, breadcrumbSchema } from '../lib/schema';
+import { FRIENDS } from '../site.config';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Клара и друзья', path: '/druzya-klary/' },
+];
+
+const extras = [
+  { id: 'rufus', name: 'Руфус', text: 'Один из гномов, которых ребёнок собирает за уроки букв.' },
+  { id: 'effie', name: 'Эффи', text: 'Ещё одна жительница лесной азбуки. Появляется в комнате наград.' },
+  { id: 'flora', name: 'Флора', text: 'Любит цветы и спокойные занятия. Её можно встретить среди наклеек.' },
+  { id: 'pixel', name: 'Пиксель', text: 'С космической станции слогов. Загадочный и чуть шумный.' },
+];
+
+const schema = [
+  {
+    '@type': 'CollectionPage',
+    name: 'Клара и друзья',
+    url: absolute('/druzya-klary/', Astro.site),
+    description: 'Клара, Зоя, Оскар, Лео, Кейт и другие персонажи приложения «Учимся читать с Кларой».',
+  },
+  breadcrumbSchema(crumbs, Astro.site),
+];
+---
+
+<BaseLayout
+  title="Клара и друзья: кто учит ребёнка читать, писать и считать"
+  description="Познакомьтесь с Кларой и её друзьями: Зоя учит писать, Оскар считать, Лео творить, Кейт думать. Это персонажи приложения «Учимся читать с Кларой»."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <header class="intro">
+      <h1>Клара и её друзья</h1>
+      <p>Клара остаётся лицом чтения. Рядом с ней живут друзья, у каждого свой характер и свой предмет. Дети быстро выбирают любимчика и потом сами просят «позаниматься с Оскаром» или «посмотреть, что там у Клары».</p>
+    </header>
+
+    <ul class="friends">
+      {FRIENDS.map((friend) => (
+        <li class="card friend">
+          <Image src={character(friend.id)} alt={friend.name} widths={[200, 320]} sizes="160px" />
+          <div>
+            <p class="subject">{friend.subject}</p>
+            <h2>{friend.name}</h2>
+            <p>{friend.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <section>
+      <h2>Ещё из комнаты наград</h2>
+      <p class="muted">За уроки букв появляются гномы, за слоги жители станции. Вот несколько из тех, кого ребёнок собирает по одному.</p>
+      <ul class="extras">
+        {extras.map((item) => (
+          <li>
+            <Image src={character(item.id)} alt={item.name} width={90} height={155} />
+            <strong>{item.name}</strong>
+            <span>{item.text}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <AppCta campaign="friends" text="В приложении «Учимся читать с Кларой» персонажи не просто картинки: ребёнок открывает комнату наград и видит, кого уже собрал." />
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 40px; }
+  .intro { max-width: 720px; margin-bottom: 32px; }
+  .friends { list-style: none; padding: 0; margin: 0 0 48px; display: grid; gap: 20px; }
+  .friend {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  .friend :global(img) { width: 120px; }
+  .subject { font-weight: 800; color: var(--orange); margin-bottom: 4px; }
+  .friend h2 { margin: 0 0 8px; }
+  .extras {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .extras li {
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+  .extras :global(img) { width: 72px; }
+  .extras span { color: var(--ink-soft); font-size: 0.95rem; }
+  @media (max-width: 640px) {
+    .friend { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  }
+</style>

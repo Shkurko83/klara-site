@@ -1,0 +1,40 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { character } from '../lib/images';
+---
+
+<BaseLayout
+  title="Страница не найдена"
+  description="Такой страницы нет. Вернитесь на главную или откройте статьи для родителей."
+  noindex
+>
+  <div class="container page">
+    <Image src={character('klara')} alt="" width={160} height={275} />
+    <h1>Клара тоже не нашла эту страницу</h1>
+    <p>Возможно, ссылка устарела. Можно начать с главной или сразу открыть статьи.</p>
+    <div class="actions">
+      <a class="button" href="/">На главную</a>
+      <a class="button secondary" href="/stati/">Статьи</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    text-align: center;
+    padding: 60px 0 80px;
+    max-width: 640px;
+  }
+  .page :global(img) {
+    margin: 0 auto 16px;
+    width: 140px;
+  }
+  .actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+</style>

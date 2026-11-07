@@ -1,0 +1,289 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FaqList from '../../components/FaqList.astro';
+import AppCta from '../../components/AppCta.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles, lastModified, relatedArticles, type Article } from '../../lib/articles';
+import { character } from '../../lib/images';
+import { formatDate, readingTimeLabel } from '../../lib/text';
+import { absolute, appId, authorId, breadcrumbSchema, faqSchema, organizationId, personSchema } from '../../lib/schema';
+import { AUTHOR, CATEGORIES } from '../../site.config';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article, all: articles } }));
+}
+
+interface Props {
+  article: Article;
+  all: Article[];
+}
+
+const { article, all } = Astro.props;
+const { data } = article;
+const { Content, headings } = await render(article);
+const category = CATEGORIES[data.category];
+const site = Astro.site;
+const path = `/stati/${article.id}/`;
+const modified = lastModified(article);
+const toc = headings.filter((heading) => heading.depth === 2);
+const related = relatedArticles(article, all);
+const ogImage = `/og/${article.id}.png`;
+const ogExists = existsSync(join(process.cwd(), 'public', 'og', `${article.id}.png`));
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Статьи', path: '/stati/' },
+  { name: category.title, path: `/razdel/${data.category}/` },
+  { name: data.title, path },
+];
+
+const schema = [
+  personSchema(site),
+  {
+    '@type': 'Article',
+    '@id': absolute(`${path}#article`, site),
+    headline: data.title,
+    description: data.description,
+    abstract: data.summary,
+    image: absolute(ogExists ? ogImage : '/og-default.png', site),
+    datePublished: data.published.toISOString(),
+    dateModified: modified.toISOString(),
+    inLanguage: 'ru-RU',
+    articleSection: category.title,
+    keywords: data.keywords.join(', '),
+    audience: { '@type': 'PeopleAudience', audienceType: 'Родители детей дошкольного и младшего школьного возраста' },
+    about: { '@type': 'Thing', name: category.title },
+    author: { '@id': authorId(site) },
+    publisher: { '@id': organizationId(site) },
+    mentions: { '@id': appId(site) },
+    mainEntityOfPage: absolute(path, site),
+    wordCount: (article.body ?? '').split(/\s+/).length,
+  },
+  breadcrumbSchema(crumbs, site),
+  ...(data.faq.length ? [faqSchema(data.faq)] : []),
+];
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  image={ogExists ? ogImage : '/og-default.png'}
+  type="article"
+  published={data.published}
+  modified={modified}
+  schema={schema}
+>
+  <article class={`container article tone-${category.color}`}>
+    <Breadcrumbs items={crumbs} />
+
+    <header class="hero">
+      <div>
+        <a class="pill" href={`/razdel/${data.category}/`}>{category.title}</a>
+        <h1 data-pagefind-meta="title">{data.title}</h1>
+        <p class="meta">
+          <span>Возраст: {data.age}</span>
+          <span>{readingTimeLabel(article.body ?? '')}</span>
+          <span>Обновлено <time datetime={modified.toISOString()}>{formatDate(modified)}</time></span>
+        </p>
+        <p class="byline">
+          Автор: <a href={`/avtor/${AUTHOR.id}/`} rel="author">{AUTHOR.name}</a>
+          {data.reviewedBy && <span>. Проверила: {data.reviewedBy}</span>}
+        </p>
+      </div>
+      <Image class="hero-character" src={character(data.character)} alt="" widths={[200, 320]} sizes="200px" loading="eager" />
+    </header>
+
+    <div class="layout">
+      {toc.length > 2 && (
+        <aside class="toc no-print" aria-label="Содержание статьи">
+          <p class="toc-title">В статье</p>
+          <ol>
+            {toc.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}
+          </ol>
+        </aside>
+      )}
+
+      <div class="content" data-pagefind-body>
+        <section class="summary" aria-label="Коротко">
+          <p class="summary-title">Коротко</p>
+          <p>{data.summary}</p>
+        </section>
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        <div class="prose">
+          <FaqList items={data.faq} />
+        </div>
+
+        <AppCta campaign={`article-${article.id}`} text={data.appTip} />
+
+        <section class="author" aria-label="Об авторе">
+          <Image src={character('klara')} alt="" width={70} height={120} />
+          <div>
+            <p class="author-name"><a href={`/avtor/${AUTHOR.id}/`}>{AUTHOR.name}</a></p>
+            <p class="muted">{AUTHOR.bio}</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    {related.length > 0 && (
+      <section class="related no-print" aria-labelledby="related-title">
+        <h2 id="related-title">Читайте также</h2>
+        <div class="grid grid-3">
+          {related.map((item) => <ArticleCard article={item} />)}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-top: 28px;
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    align-items: end;
+    gap: 24px;
+    background: var(--tone-soft);
+    border-radius: var(--radius);
+    padding: 36px 36px 0;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .hero > div {
+    padding-bottom: 32px;
+  }
+  .hero h1 {
+    margin: 14px 0 12px;
+    max-width: 22ch;
+  }
+  .hero .pill {
+    background: #fff;
+    text-decoration: none;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .byline {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+  .hero-character {
+    width: 180px;
+    height: auto;
+    justify-self: center;
+    margin-bottom: -10px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+  .layout:not(:has(.toc)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .toc {
+    position: sticky;
+    top: 96px;
+    background: var(--paper);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    font-size: 0.92rem;
+  }
+  .toc-title {
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .toc ol {
+    margin: 0;
+    padding-left: 1.1em;
+    display: grid;
+    gap: 6px;
+  }
+  .toc a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .toc a:hover {
+    color: var(--orange);
+  }
+  .content {
+    max-width: var(--text);
+  }
+  .summary {
+    background: var(--paper);
+    border: 3px solid var(--tone);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-bottom: 32px;
+    font-size: 1.08rem;
+  }
+  .summary-title {
+    font-weight: 900;
+    color: var(--tone);
+    margin-bottom: 6px;
+  }
+  .summary p:last-child {
+    margin: 0;
+  }
+  .author {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 18px;
+    align-items: center;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px;
+  }
+  .author :global(img) {
+    width: 64px;
+  }
+  .author-name {
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .author p {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+  }
+  .related {
+    margin-top: 64px;
+  }
+  @media (max-width: 960px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .toc {
+      position: static;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 24px 22px 0;
+    }
+    .hero-character {
+      width: 120px;
+    }
+  }
+</style>

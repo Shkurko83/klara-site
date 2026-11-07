@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import { screen } from '../lib/images';
+
+interface Props {
+  name: string;
+  alt: string;
+  caption?: string;
+  eager?: boolean;
+}
+
+const { name, alt, caption, eager = false } = Astro.props;
+---
+
+<figure class="phone-shot">
+  <div class="frame">
+    <Image src={screen(name)} alt={alt} widths={[240, 360, 480]} sizes="(max-width: 640px) 60vw, 240px" loading={eager ? 'eager' : 'lazy'} />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .phone-shot {
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+  }
+  .frame {
+    background: #1d1f2b;
+    border-radius: 34px;
+    padding: 9px;
+    box-shadow: var(--shadow-strong);
+    width: min(240px, 100%);
+  }
+  .frame :global(img) {
+    border-radius: 26px;
+    width: 100%;
+    height: auto;
+  }
+  figcaption {
+    font-weight: 800;
+    text-align: center;
+    font-size: 0.95rem;
+    max-width: 240px;
+  }
+</style>

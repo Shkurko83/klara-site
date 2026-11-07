@@ -1,0 +1,100 @@
+---
+import { APP, AUTHOR, CATEGORIES, SITE, appStoreUrl } from '../site.config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer no-print">
+  <div class="container columns">
+    <div class="about">
+      <p class="brand">{SITE.name}</p>
+      <p>{SITE.tagline}. Сайт для родителей детей 3-7 лет от создателей приложения «{APP.name}».</p>
+      <a class="button dark" href={appStoreUrl('footer')} rel="noopener">Скачать в App Store</a>
+    </div>
+    <nav aria-label="Разделы статей">
+      <p class="heading">Темы</p>
+      {Object.entries(CATEGORIES).map(([id, category]) => <a href={`/razdel/${id}/`}>{category.title}</a>)}
+    </nav>
+    <nav aria-label="Полезное">
+      <p class="heading">Полезное</p>
+      <a href="/instrumenty/gotovnost-k-chteniyu/">Тест: готов ли ребёнок читать</a>
+      <a href="/instrumenty/tehnika-chteniya/">Проверка техники чтения</a>
+      <a href="/materialy/">Материалы для печати</a>
+      <a href="/druzya-klary/">Клара и друзья</a>
+    </nav>
+    <nav aria-label="О проекте">
+      <p class="heading">О проекте</p>
+      <a href="/prilozhenie/">Приложение «{APP.name}»</a>
+      <a href={`/avtor/${AUTHOR.id}/`}>{AUTHOR.name}</a>
+      <a href="/o-proekte/">О сайте</a>
+      <a href={SITE.supportChat} rel="noopener">Написать нам в Telegram</a>
+      <a href="/konfidencialnost/">Конфиденциальность</a>
+    </nav>
+  </div>
+  <div class="container bottom">
+    <span>© {year} {AUTHOR.name}. {SITE.name}</span>
+    <a href="/rss.xml">RSS</a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: #2b2d42;
+    color: #e7e8f2;
+    margin-top: 40px;
+    padding: 56px 0 24px;
+    font-size: 0.98rem;
+  }
+  .columns {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 32px;
+  }
+  .brand {
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .about p {
+    color: #c9cbe0;
+  }
+  .heading {
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  nav {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+  }
+  nav a {
+    color: #c9cbe0;
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--yellow);
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    color: #9da0bd;
+    font-size: 0.9rem;
+  }
+  .bottom a {
+    color: #9da0bd;
+  }
+  @media (max-width: 860px) {
+    .columns {
+      grid-template-columns: 1fr 1fr;
+    }
+    .about {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

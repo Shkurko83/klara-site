@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AppCta from '../../components/AppCta.astro';
+import { absolute, breadcrumbSchema } from '../../lib/schema';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Для печати', path: '/materialy/' },
+];
+
+const items = [
+  {
+    href: '/materialy/kartochki-slogov/',
+    title: 'Карточки слогов',
+    text: 'МА, МО, МУ и другие слоги с М, Н, Л, Р, С, П, Т, К. Распечатайте, разрежьте, играйте в лото.',
+    tone: 'orange',
+  },
+  {
+    href: '/materialy/bukvy-raskraska/',
+    title: 'Буквы-раскраски',
+    text: 'Все 33 буквы крупным контуром. Раскрасить, обвести пальцем, повесить на холодильник.',
+    tone: 'green',
+  },
+  {
+    href: '/materialy/kalendar-solnyshek/',
+    title: 'Календарь солнышек',
+    text: 'Неделя на одном листе: позанимались, раскрасили солнышко. Как привычка, а не как оценка.',
+    tone: 'yellow',
+  },
+];
+
+const schema = [
+  { '@type': 'CollectionPage', name: 'Материалы для печати', url: absolute('/materialy/', Astro.site) },
+  breadcrumbSchema(crumbs, Astro.site),
+];
+---
+
+<BaseLayout
+  title="Материалы для печати: слоги, буквы и календарь занятий"
+  description="Бесплатные материалы для занятий чтением дома: карточки слогов, раскраски букв и календарь солнышек. Откройте и нажмите «Печать»."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <h1>Материалы для печати</h1>
+    <p class="muted">Ничего скачивать и регистрироваться не нужно. Откройте лист, нажмите «Печать» в браузере, поставьте альбомную ориентацию, если карточки мелковаты.</p>
+    <div class="grid grid-3">
+      {items.map((item) => (
+        <a class={`print-card tone-${item.tone}`} href={item.href}>
+          <h2>{item.title}</h2>
+          <p>{item.text}</p>
+        </a>
+      ))}
+    </div>
+    <AppCta campaign="printables" />
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 40px; }
+  .page > .muted { max-width: 46em; margin-bottom: 28px; }
+  .print-card {
+    display: block;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px;
+    text-decoration: none;
+    color: var(--ink);
+    border-bottom: 6px solid var(--tone);
+  }
+  .print-card:hover { color: var(--ink); transform: translateY(-3px); }
+  .print-card p { color: var(--ink-soft); margin: 0; }
+  h2 { font-size: 1.3rem; }
+</style>

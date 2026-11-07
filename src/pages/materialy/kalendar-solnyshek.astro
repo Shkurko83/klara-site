@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { absolute, breadcrumbSchema } from '../../lib/schema';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Для печати', path: '/materialy/' },
+  { name: 'Календарь солнышек', path: '/materialy/kalendar-solnyshek/' },
+];
+
+const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+const schema = [
+  { '@type': 'HowTo', name: 'Календарь солнышек', url: absolute('/materialy/kalendar-solnyshek/', Astro.site) },
+  breadcrumbSchema(crumbs, Astro.site),
+];
+---
+
+<BaseLayout
+  title="Календарь солнышек на неделю"
+  description="Распечатайте календарь занятий на неделю: почитали 10 минут, раскрасили солнышко. Привычка без гонки за оценкой."
+  schema={schema}
+>
+  <div class="container page">
+    <div class="no-print">
+      <Breadcrumbs items={crumbs} />
+      <h1>Календарь солнышек</h1>
+      <p>Неделя с понедельника. Позанимались хотя бы 10 минут, раскрасили солнышко. Пропуск не наказывается: просто на следующий день снова есть кружок.</p>
+      <button class="button" type="button" onclick="window.print()">Распечатать</button>
+    </div>
+    <div class="sheet">
+      <p class="title">Наша неделя чтения</p>
+      <p class="line">Имя: ______________________ &nbsp; Неделя: ____________________</p>
+      <div class="week">
+        {days.map((day) => (
+          <div class="day">
+            <span>{day}</span>
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="18" fill="none" stroke="#2b2d42" stroke-width="3" />
+              {Array.from({ length: 12 }, (_, i) => (
+                <rect x="48" y="8" width="4" height="16" rx="2" transform={`rotate(${i * 30} 50 50)`} fill="#2b2d42" />
+              ))}
+            </svg>
+          </div>
+        ))}
+      </div>
+      <p class="note">Солнышко за любое занятие: книга, карточки, приложение «Учимся читать с Кларой». Не за скорость и не за «идеально».</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 40px; }
+  .sheet {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+    margin-top: 24px;
+  }
+  .title { font-size: 1.8rem; font-weight: 900; text-align: center; }
+  .line { text-align: center; margin-bottom: 28px; }
+  .week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+  }
+  .day {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    font-weight: 800;
+  }
+  .day svg { width: 100%; max-width: 90px; }
+  .note { margin-top: 28px; color: var(--ink-soft); }
+  @media (max-width: 700px) {
+    .week { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media print {
+    .sheet { box-shadow: none; }
+    .week { grid-template-columns: repeat(7, 1fr); }
+  }
+</style>

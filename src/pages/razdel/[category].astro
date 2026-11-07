@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import AppCta from '../../components/AppCta.astro';
+import { getArticles, type Article } from '../../lib/articles';
+import { character } from '../../lib/images';
+import { absolute, breadcrumbSchema } from '../../lib/schema';
+import { CATEGORIES, type CategoryId } from '../../site.config';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return (Object.keys(CATEGORIES) as CategoryId[])
+    .map((id) => ({ params: { category: id }, props: { id, items: articles.filter((article) => article.data.category === id) } }))
+    .filter((path) => path.props.items.length > 0);
+}
+
+interface Props {
+  id: CategoryId;
+  items: Article[];
+}
+
+const { id, items } = Astro.props;
+const category = CATEGORIES[id];
+const site = Astro.site;
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Статьи', path: '/stati/' },
+  { name: category.title, path: `/razdel/${id}/` },
+];
+const schema = [
+  {
+    '@type': 'CollectionPage',
+    name: category.title,
+    description: category.description,
+    url: absolute(`/razdel/${id}/`, site),
+  },
+  breadcrumbSchema(crumbs, site),
+];
+---
+
+<BaseLayout title={`${category.title}: статьи для родителей`} description={category.description} schema={schema}>
+  <div class={`container page tone-${category.color}`}>
+    <Breadcrumbs items={crumbs} />
+    <header class="hero">
+      <div>
+        <h1>{category.title}</h1>
+        <p>{category.description}</p>
+      </div>
+      <Image src={character(category.character)} alt="" widths={[160, 260]} sizes="160px" loading="eager" />
+    </header>
+    <div class="grid grid-2">
+      {items.map((article) => <ArticleCard article={article} />)}
+    </div>
+    <AppCta campaign={`category-${id}`} />
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 28px 0 40px;
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 160px;
+    align-items: end;
+    gap: 24px;
+    background: var(--tone-soft);
+    border-radius: var(--radius);
+    padding: 32px 32px 0;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .hero > div {
+    padding-bottom: 28px;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    max-width: 60ch;
+  }
+  .hero :global(img) {
+    width: 140px;
+    margin-bottom: -8px;
+  }
+</style>

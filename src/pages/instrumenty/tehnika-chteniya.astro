@@ -1,0 +1,297 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AppCta from '../../components/AppCta.astro';
+import FaqList from '../../components/FaqList.astro';
+import { character } from '../../lib/images';
+import { absolute, breadcrumbSchema, faqSchema } from '../../lib/schema';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Тесты', path: '/instrumenty/' },
+  { name: 'Техника чтения', path: '/instrumenty/tehnika-chteniya/' },
+];
+
+const texts = [
+  {
+    id: 'slog',
+    title: 'Слоги и короткие слова',
+    hint: 'Для дошкольника, который только складывает слоги',
+    body: 'Мама мыла раму. Папа пил сок. Киса спала на окне. Муха села на кашу. Рома ловил рыбу. Лена мала, но сама ела кашу. Тима нёс сумку. Ната шла в сад.',
+  },
+  {
+    id: 'class1',
+    title: 'Конец 1 класса',
+    hint: 'Короткий связный текст',
+    body: 'У Лены жил кот. Звали его Барсик. Барсик был рыжий и пушистый. Утром Лена поила кота молоком. Днём Барсик спал на окне и смотрел на голубей. Вечером он ловил бумажный мячик. Лена смеялась и гладила кота по спине.',
+  },
+  {
+    id: 'class2',
+    title: '2 класс',
+    hint: 'Чуть длиннее, с понятным сюжетом',
+    body: 'Весной в парке расцвели яблони. Маша шла по дорожке и слушала птиц. На ветке сидела синица и держала в клюве травинку. Рядом прыгал воробей. Маша не стала их пугать. Она села на скамейку и достала книжку. Читать в саду было гораздо интереснее, чем дома. Ветер листал страницы сам, и Маша только успевала за ним.',
+  },
+];
+
+const norms = [
+  { grade: 'До школы', low: 10, mid: 20, note: 'Слоги и простые слова. Скорость почти не важна.' },
+  { grade: '1 класс, конец года', low: 25, mid: 40, note: 'Ориентир многих школ. Важнее, понимает ли ребёнок фразу.' },
+  { grade: '2 класс', low: 40, mid: 60, note: 'Уже читает про себя часть слов, но вслух ещё можно по слогам.' },
+  { grade: '3 класс', low: 60, mid: 80, note: 'Темп ближе к разговору. Смысл важнее секундомера.' },
+];
+
+const faq = [
+  {
+    q: 'Если ребёнок читает медленнее нормы, это отставание?',
+    a: 'Нет. Нормы в школах разные, а секундомер часто пугает. Смотрите, понимает ли он, что прочитал, и не плачет ли во время проверки. Медленное осмысленное чтение лучше быстрого без смысла.',
+  },
+  {
+    q: 'Нужно ли засекать дома каждую неделю?',
+    a: 'Не нужно. Раз в месяц достаточно, и только если ребёнку не страшно. Ежедневная «гонка на слова» быстро убивает охоту читать.',
+  },
+];
+
+const schema = [
+  {
+    '@type': 'WebApplication',
+    name: 'Проверка техники чтения',
+    url: absolute('/instrumenty/tehnika-chteniya/', Astro.site),
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Любой браузер',
+    offers: { '@type': 'Offer', price: 0, priceCurrency: 'RUB' },
+    inLanguage: 'ru',
+  },
+  breadcrumbSchema(crumbs, Astro.site),
+  faqSchema(faq),
+];
+---
+
+<BaseLayout
+  title="Проверка техники чтения: слова в минуту"
+  description="Бесплатная проверка техники чтения: ребёнок читает текст, вы отмечаете последнее слово. Покажем слова в минуту и сравним с ориентирами по классам."
+  schema={schema}
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <header class="hero tone-blue">
+      <div>
+        <h1>Проверка техники чтения</h1>
+        <p>Выберите текст по силам. Нажмите «Начать», ребёнок читает вслух минуту. Потом нажмите на слово, где остановились. Считать будем мы.</p>
+      </div>
+      <Image src={character('oscar')} alt="" widths={[160, 240]} sizes="150px" loading="eager" />
+    </header>
+
+    <div class="toolbar card">
+      <label>
+        Текст
+        <select id="text-select">
+          {texts.map((item) => <option value={item.id}>{item.title}</option>)}
+        </select>
+      </label>
+      <p class="hint" id="hint">{texts[0].hint}</p>
+      <div class="timer-row">
+        <p class="time" id="time">1:00</p>
+        <button class="button" type="button" id="start">Начать</button>
+        <button class="button secondary" type="button" id="reset">Сначала</button>
+      </div>
+      <p class="muted" id="status">Пока ничего не засекаем. Можно сначала просто прочитать текст глазами.</p>
+    </div>
+
+    <div class="reader card" id="reader"></div>
+
+    <section class="result card" id="result" hidden aria-live="polite">
+      <p class="result-label">Результат</p>
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+    </section>
+
+    <section class="prose">
+      <h2>Ориентиры, не приговор</h2>
+      <p>Цифры ниже собраны из типичных школьных требований. У конкретной школы может быть иначе. Для дошкольника таблица почти не нужна: нам важно, что он складывает слоги и понимает слово.</p>
+      <table>
+        <thead>
+          <tr><th>Этап</th><th>Ниже темпа</th><th>Ориентир</th><th>Комментарий</th></tr>
+        </thead>
+        <tbody>
+          {norms.map((row) => (
+            <tr>
+              <td>{row.grade}</td>
+              <td>до {row.low}</td>
+              <td>около {row.mid}</td>
+              <td>{row.note}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <AppCta campaign="tool-speed" text="Если дошкольник ещё читает по слогам, секундомер рано. В приложении Клара ведёт от букв к слогам без гонки на скорость." />
+    <FaqList items={faq} />
+  </div>
+</BaseLayout>
+
+<script define:vars={{ texts, norms }}>
+  const reader = document.getElementById('reader');
+  const select = document.getElementById('text-select');
+  const hint = document.getElementById('hint');
+  const timeEl = document.getElementById('time');
+  const status = document.getElementById('status');
+  const result = document.getElementById('result');
+  const startBtn = document.getElementById('start');
+
+  let words = [];
+  let secondsLeft = 60;
+  let timer = 0;
+  let running = false;
+  let finished = false;
+
+  function currentText() {
+    return texts.find((item) => item.id === select.value) ?? texts[0];
+  }
+
+  function renderText() {
+    const item = currentText();
+    hint.textContent = item.hint;
+    words = item.body.trim().split(/\s+/);
+    reader.replaceChildren(
+      ...words.map((word, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'word';
+        button.textContent = word;
+        button.dataset.index = String(index);
+        return button;
+      }),
+    );
+  }
+
+  function setTime(value) {
+    secondsLeft = value;
+    const m = Math.floor(value / 60);
+    const s = String(value % 60).padStart(2, '0');
+    timeEl.textContent = `${m}:${s}`;
+  }
+
+  function stopTimer() {
+    window.clearInterval(timer);
+    running = false;
+    startBtn.textContent = 'Начать';
+  }
+
+  function resetAll() {
+    stopTimer();
+    finished = false;
+    setTime(60);
+    result.hidden = true;
+    status.textContent = 'Готово. Можно начинать заново.';
+    reader.querySelectorAll('.word').forEach((el) => el.classList.remove('read', 'last'));
+  }
+
+  function showResult(count) {
+    const wpm = count;
+    let row = norms[0];
+    if (select.value === 'class1') row = norms[1];
+    if (select.value === 'class2') row = norms[2];
+    let comment = `Ориентир для этого текста: около ${row.mid} слов в минуту. ${row.note}`;
+    if (wpm < row.low) comment = `По таблице это ниже ориентира (${row.low}+). Не торопите: сначала понимание, потом темп.`;
+    else if (wpm >= row.mid) comment = `Темп уже около школьного ориентира. Смотрите, не проглатывает ли ребёнок смысл ради скорости.`;
+    document.getElementById('result-title').textContent = `${wpm} ${wpm % 10 === 1 && wpm % 100 !== 11 ? 'слово' : wpm % 10 >= 2 && wpm % 10 <= 4 && (wpm % 100 < 12 || wpm % 100 > 14) ? 'слова' : 'слов'} в минуту`;
+    document.getElementById('result-text').textContent = comment;
+    result.hidden = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  renderText();
+  setTime(60);
+
+  select.addEventListener('change', () => {
+    resetAll();
+    renderText();
+  });
+
+  startBtn.addEventListener('click', () => {
+    if (running) return;
+    resetAll();
+    running = true;
+    finished = false;
+    startBtn.textContent = 'Идёт минута';
+    status.textContent = 'Ребёнок читает вслух. Когда минута кончится, нажмите на последнее прочитанное слово.';
+    timer = window.setInterval(() => {
+      setTime(secondsLeft - 1);
+      if (secondsLeft <= 0) {
+        stopTimer();
+        finished = true;
+        status.textContent = 'Минута вышла. Нажмите на слово, где ребёнок остановился.';
+      }
+    }, 1000);
+  });
+
+  document.getElementById('reset').addEventListener('click', resetAll);
+
+  reader.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !target.classList.contains('word')) return;
+    if (!finished && running) {
+      stopTimer();
+      finished = true;
+    }
+    if (!finished) {
+      status.textContent = 'Сначала нажмите «Начать». Если ребёнок закончил раньше минуты, нажмите на последнее слово сразу.';
+      return;
+    }
+    const index = Number(target.dataset.index);
+    reader.querySelectorAll('.word').forEach((el, i) => {
+      el.classList.toggle('read', i <= index);
+      el.classList.toggle('last', i === index);
+    });
+    showResult(index + 1);
+  });
+</script>
+
+<style>
+  .page { padding: 28px 0 48px; }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 150px;
+    gap: 24px;
+    align-items: end;
+    background: var(--tone-soft);
+    border-radius: var(--radius);
+    padding: 32px 32px 0;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .hero > div { padding-bottom: 28px; }
+  .hero :global(img) { width: 140px; margin-bottom: -8px; }
+  .toolbar { max-width: 820px; margin-bottom: 20px; }
+  .toolbar label { display: grid; gap: 6px; font-weight: 800; }
+  .toolbar select {
+    font: inherit;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 2px solid var(--line);
+  }
+  .timer-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .time { font-size: 2rem; font-weight: 900; margin: 0; }
+  .reader {
+    max-width: 820px;
+    font-size: 1.25rem;
+    line-height: 2;
+  }
+  .reader :global(.word) {
+    font: inherit;
+    background: transparent;
+    border: 0;
+    padding: 2px 4px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .reader :global(.word:hover) { background: var(--yellow-soft); }
+  .reader :global(.word.read) { background: var(--green-soft); }
+  .reader :global(.word.last) { background: var(--orange); color: #fff; }
+  .result { max-width: 820px; margin: 24px 0; border: 3px solid var(--blue); scroll-margin-top: 90px; }
+  .result-label { font-weight: 900; color: var(--blue); }
+  @media (max-width: 640px) { .hero { grid-template-columns: 1fr; } }
+</style>

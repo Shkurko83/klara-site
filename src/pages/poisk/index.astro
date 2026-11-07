@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { getArticles } from '../../lib/articles';
+import { CATEGORIES } from '../../site.config';
+
+const articles = (await getArticles()).map((article) => ({
+  id: article.id,
+  title: article.data.title,
+  description: article.data.description,
+  category: CATEGORIES[article.data.category].title,
+  href: `/stati/${article.id}/`,
+}));
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'Поиск', path: '/poisk/' },
+];
+
+const q = Astro.url.searchParams.get('q') ?? '';
+---
+
+<BaseLayout
+  title="Поиск по сайту"
+  description="Найдите статью о чтении, буквах, слогах и подготовке к школе."
+  noindex
+>
+  <div class="container page">
+    <Breadcrumbs items={crumbs} />
+    <h1>Поиск</h1>
+    <form class="search" method="get" action="/poisk/">
+      <label class="visually-hidden" for="q">Что ищем</label>
+      <input id="q" name="q" type="search" value={q} placeholder="Например: слоги, Клара, Константин Шкурко" autocomplete="off" />
+      <button class="button" type="submit">Найти</button>
+    </form>
+    <p class="muted" id="status"></p>
+    <ul class="results" id="results"></ul>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ articles, q }}>
+  const input = document.getElementById('q');
+  const results = document.getElementById('results');
+  const status = document.getElementById('status');
+
+  function search(query) {
+    const needle = query.trim().toLowerCase();
+    const found = needle
+      ? articles.filter((item) => `${item.title} ${item.description} ${item.category} константин шкурко konstantin shkurko клара`.toLowerCase().includes(needle) || item.title.toLowerCase().includes(needle) || item.description.toLowerCase().includes(needle))
+      : articles;
+    results.replaceChildren(
+      ...found.map((item) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="${item.href}"><span class="cat">${item.category}</span><strong>${item.title}</strong><span>${item.description}</span></a>`;
+        return li;
+      }),
+    );
+    if (!needle) status.textContent = `Всего материалов: ${articles.length}. Начните вводить запрос.`;
+    else if (found.length === 0) status.textContent = 'Ничего не нашлось. Попробуйте слово «слоги», «буквы» или «Клара».';
+    else status.textContent = `Нашли: ${found.length}`;
+  }
+
+  search(q);
+  input.addEventListener('input', () => search(input.value));
+</script>
+
+<style>
+  .page { padding: 28px 0 48px; max-width: 820px; }
+  .search { display: flex; gap: 10px; margin: 18px 0; }
+  .search input {
+    flex: 1;
+    font: inherit;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 2px solid var(--line);
+  }
+  .results { list-style: none; padding: 0; display: grid; gap: 12px; }
+  .results :global(a) {
+    display: grid;
+    gap: 4px;
+    background: var(--paper);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .results :global(.cat) { font-weight: 800; color: var(--orange); font-size: 0.85rem; }
+  .results :global(span:last-child) { color: var(--ink-soft); font-size: 0.95rem; }
+</style>

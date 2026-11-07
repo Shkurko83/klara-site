@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { absolute, breadcrumbSchema, personSchema } from '../lib/schema';
+import { AUTHOR, SITE, APP } from '../site.config';
+
+const crumbs = [
+  { name: 'Главная', path: '/' },
+  { name: 'О сайте', path: '/o-proekte/' },
+];
+const schema = [personSchema(Astro.site), breadcrumbSchema(crumbs, Astro.site)];
+---
+
+<BaseLayout
+  title="О сайте «Учимся с Кларой»"
+  description="Сайт для родителей о том, как научить ребёнка читать. Его делает Константин Шкурко (Konstantin Shkurko), автор приложения «Учимся читать с Кларой»."
+  schema={schema}
+>
+  <div class="container page prose">
+    <Breadcrumbs items={crumbs} />
+    <h1>О сайте</h1>
+    <p>«{SITE.name}» - это не журнал с советами «вообще» и не кабинет логопеда. Это площадка автора приложения «{APP.name}»: здесь те же принципы, что в уроках, только словами для взрослого.</p>
+    <p>Пишет {AUTHOR.name}, в сети его также ищут как {AUTHOR.nameLatin}. Он разработчик, а не дефектолог. Если у ребёнка стойкие трудности с речью, звуками или чтением, которые не сдвигаются домашними занятиями, это повод к специалисту, а не ещё одна статья.</p>
+    <h2>Зачем мы это делаем</h2>
+    <p>Родители гуглят «как научить читать», «ребёнок знает буквы, но не читает», «Учимся читать с Кларой». Мы хотим, чтобы на эти запросы находился спокойный разбор, а не пугалки и стоуроковые марафоны.</p>
+    <p>Если после статьи захочется попробовать занятия с голосом и наградами, рядом есть приложение. Если не захочется, статьи всё равно остаются полезными сами по себе.</p>
+    <h2>Как пользоваться</h2>
+    <ul>
+      <li>Статьи лежат в <a href="/stati/">разделе статей</a>, их можно читать без регистрации.</li>
+      <li>Тесты не отправляют ответы на сервер.</li>
+      <li>Материалы для печати открываются в браузере.</li>
+      <li>Домена пока может не быть: локально сайт запускается командой <code>npm run dev</code>.</li>
+    </ul>
+    <p>Вопросы и замечания: <a href={SITE.supportChat} rel="noopener">Telegram поддержки</a>.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding: 28px 0 48px; }
+</style>

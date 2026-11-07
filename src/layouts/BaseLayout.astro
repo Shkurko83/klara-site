@@ -1,0 +1,110 @@
+---
+import '@fontsource-variable/nunito';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { APP, SITE } from '../site.config';
+import { graph, organizationSchema, websiteSchema } from '../lib/schema';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Картинка для превью ссылок, путь от корня сайта. */
+  image?: string;
+  type?: 'website' | 'article';
+  /** Узлы schema.org для этой страницы. Организация и сайт добавляются всегда. */
+  schema?: object[];
+  published?: Date;
+  modified?: Date;
+  noindex?: boolean;
+  /** Полный заголовок без приписки названия сайта. */
+  bareTitle?: boolean;
+}
+
+const { title, description, image = '/og-default.png', type = 'website', schema = [], published, modified, noindex = false, bareTitle = false } = Astro.props;
+const site = Astro.site;
+const canonical = new URL(Astro.url.pathname, site).toString();
+const fullTitle = bareTitle ? title : `${title} | ${SITE.name}`;
+const imageUrl = new URL(image, site).toString();
+const jsonLd = graph(organizationSchema(site), websiteSchema(site), ...schema);
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Константин Шкурко, Konstantin Shkurko" />
+    <link rel="canonical" href={canonical} />
+    <link rel="author" href="/avtor/konstantin-shkurko/" />
+    <link rel="alternate" href={canonical} hreflang="ru" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
+    {noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {modified && <meta property="article:modified_time" content={modified.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+
+    <meta name="apple-itunes-app" content={`app-id=${APP.appStoreId}`} />
+    <meta name="theme-color" content="#fff8ee" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name}: новые статьи`} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {SITE.yandexVerification && <meta name="yandex-verification" content={SITE.yandexVerification} />}
+    {SITE.googleVerification && <meta name="google-site-verification" content={SITE.googleVerification} />}
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    {SITE.yandexMetrikaId && (
+      <script is:inline define:vars={{ id: SITE.yandexMetrikaId }}>
+        (function (m, e, t, r, i, k, a) {
+          m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+          m[i].l = 1 * new Date();
+          k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+        ym(Number(id), 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false });
+      </script>
+    )}
+  </head>
+  <body>
+    <a class="skip-link no-print" href="#main">Перейти к содержанию</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 8px;
+    background: var(--ink);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    z-index: 100;
+  }
+  .skip-link:focus {
+    left: 8px;
+  }
+</style>
